@@ -1,12 +1,18 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
-	gorm.Model
-	Email    string `gorm:"uniqueIndex"`
-	UserName string
-	Password string
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Email     string    `gorm:"uniqueIndex" json:"email"`
+	UserName  string    `json:"username"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type UserResponse struct {
