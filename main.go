@@ -10,10 +10,12 @@ import (
 )
 
 func main() {
-
 	router := gin.Default()
 	db := config.InitDB()
 	uc := controllers.NewUserController(db)
+	hub := controllers.NewHub()
+	wsc := controllers.NewWsController(hub)
+	routes.WsRouter(router, wsc)
 	routes.UserRouter(router, uc)
 	log.Fatal(router.Run(":8080"))
 }
