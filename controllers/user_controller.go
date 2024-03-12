@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"example.com/go-htmx/models"
+	"example.com/go-htmx/utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -42,4 +43,21 @@ func (uc *UserController) GetUser(c *gin.Context) {
 		return
 	}
 	c.JSON(200, user)
+}
+
+func (uc *UserController) Login(c *gin.Context) {
+	var loginRequest models.LoginRequest
+	var user models.User
+	if err := uc.DB.Where("email = ? ", loginRequest.Email).First(&user).Error; err != nil {
+		c.JSON(404, gin.H{"error": "User Not found"})
+		return
+	}
+	passwordErr := bcrypt.CompareHashAndPassword([]byte(loginRequest.Password), []byte(loginRequest.Password))
+	if passwordErr != nil {
+		c.JSON(400, gin.H{"error": "Incorrect Password"})
+		return
+	}
+	token, _ := utils.GenerateToken(user.UserName)
+	c.JSON(200, gin.H{"token": token})
+
 }
