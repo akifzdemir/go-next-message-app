@@ -17,5 +17,7 @@ func main() {
 	wsc := controllers.NewWsController(hub)
 	routes.WsRouter(router, wsc)
 	routes.UserRouter(router, uc)
+	go hub.Run()
+
 	log.Fatal(router.Run(":8080"))
 }
