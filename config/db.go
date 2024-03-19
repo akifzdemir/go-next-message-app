@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 
+	"example.com/go-htmx/controllers"
 	"example.com/go-htmx/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -18,6 +19,7 @@ func InitDB() *gorm.DB {
 	}
 
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&controllers.Room{})
 
 	return db
 }

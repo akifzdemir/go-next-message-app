@@ -16,7 +16,7 @@ func main() {
 	db := config.InitDB()
 	uc := controllers.NewUserController(db)
 	hub := controllers.NewHub()
-	wsc := controllers.NewWsController(hub)
+	wsc := controllers.NewWsController(hub, db)
 	routes.WsRouter(router, wsc)
 	routes.UserRouter(router, uc)
 	go hub.Run()

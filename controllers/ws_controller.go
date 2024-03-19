@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"gorm.io/gorm"
 )
 
 type Hub struct {
@@ -30,13 +32,19 @@ type Message struct {
 }
 
 type Room struct {
-	ID      string
-	Name    string
-	Clients map[string]*Client
+	ID      string             `gorm:"primaryKey" json:"id"`
+	Name    string             `json:"name"`
+	Clients map[string]*Client `gorm:"-" json:"-"`
+}
+
+func (room *Room) BeforeCreate(tx *gorm.DB) (err error) {
+	room.ID = uuid.NewString()
+	return
 }
 
 type WsController struct {
 	hub *Hub
+	db  *gorm.DB
 }
 
 var upgrader = websocket.Upgrader{
@@ -56,9 +64,10 @@ func NewHub() *Hub {
 	}
 }
 
-func NewWsController(h *Hub) *WsController {
+func NewWsController(h *Hub, db *gorm.DB) *WsController {
 	return &WsController{
 		hub: h,
+		db:  db,
 	}
 }
 
@@ -135,11 +144,16 @@ func (wsc *WsController) CreateRoom(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
+	if err := wsc.db.Create(&roomReq).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	wsc.hub.Rooms[roomReq.ID] = &Room{
 		ID:      roomReq.ID,
 		Name:    roomReq.Name,
 		Clients: make(map[string]*Client),
 	}
+
 	c.JSON(200, roomReq)
 }
 
