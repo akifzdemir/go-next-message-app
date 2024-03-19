@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 const AuthButtons = dynamic(() => import("./auth-buttons"), {
   ssr: false,
@@ -11,7 +12,7 @@ export default function Header() {
       className="fixed flex flex-row items-center justify-between
      top-0 left-0 w-full shadow-2xl h-16 px-14 border-b"
     >
-      <div>Next.js-Go </div>
+      <Link href={"/"}>Next.js-Go </Link>
       <div className="flex flex-row items-center gap-4">
         <AuthButtons />
       </div>
