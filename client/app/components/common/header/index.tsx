@@ -1,5 +1,9 @@
-import Link from "next/link";
-import { Button } from "../ui/button";
+import dynamic from "next/dynamic";
+
+const AuthButtons = dynamic(() => import("./auth-buttons"), {
+  ssr: false,
+  loading: () => <p>Loading...</p>,
+});
 
 export default function Header() {
   return (
@@ -9,12 +13,7 @@ export default function Header() {
     >
       <div>Next.js-Go </div>
       <div className="flex flex-row items-center gap-4">
-        <Link href={"/register"}>
-          <Button variant={"secondary"}>Register</Button>
-        </Link>
-        <Link href={"/login"}>
-          <Button>Login</Button>
-        </Link>
+        <AuthButtons />
       </div>
     </header>
   );

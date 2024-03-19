@@ -60,7 +60,7 @@ export default function Register() {
               <Input
                 placeholder="Your username..."
                 type="text"
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
                 className="w-[70%]"
               />
             </div>

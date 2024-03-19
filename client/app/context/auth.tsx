@@ -1,6 +1,13 @@
 "use client";
 import { JwtPayload, jwtDecode } from "jwt-decode";
-import { FC, ReactNode, createContext, useContext, useReducer } from "react";
+import {
+  FC,
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+} from "react";
 
 type AuthState = {
   isLoggedIn: boolean;
@@ -8,7 +15,7 @@ type AuthState = {
 };
 
 type ActionType = {
-  type: "LOGIN" | "LOGOUT";
+  type: "LOGIN" | "LOGOUT" | "SET_INITIAL";
   payload?: any;
 };
 
@@ -18,10 +25,7 @@ type ContextType = {
 };
 
 const initialState: AuthState = {
-  isLoggedIn:
-    typeof window !== "undefined" && localStorage.getItem("jwt-token")
-      ? true
-      : false,
+  isLoggedIn: false,
   username: "",
 };
 
@@ -49,14 +53,20 @@ const reducer = (state: AuthState, action: ActionType) => {
       return {
         ...state,
         isLoggedIn: true,
-        name: decodedToken.username,
+        username: decodedToken.username,
       };
     case "LOGOUT":
       localStorage.removeItem("jwt-token");
       return {
         ...state,
         isLoggedIn: false,
-        name: "",
+        username: "",
+      };
+    case "SET_INITIAL":
+      return {
+        ...state,
+        isLoggedIn: true,
+        username: action.payload,
       };
 
     default:
@@ -66,6 +76,15 @@ const reducer = (state: AuthState, action: ActionType) => {
 
 const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwt-token");
+    if (token) {
+      const decodedToken = jwtDecode<CustomJwtPayload>(token);
+      dispatch({ type: "SET_INITIAL", payload: decodedToken.username });
+    }
+  }, []);
+
   return (
     <AuthContext.Provider value={{ state, dispatch }}>
       {children}
