@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { LoginRequest } from "../types/auth";
 import { login } from "../api/auth";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../context/auth";
 
 export default function Login() {
   const [form, setForm] = useState<LoginRequest>({
@@ -15,12 +16,14 @@ export default function Login() {
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { dispatch } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       setLoading(true);
       const res = await login(form);
+      dispatch({ type: "LOGIN", payload: res.data?.token });
       router.push("/");
     } catch (error) {
       console.log(error);

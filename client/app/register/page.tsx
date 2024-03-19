@@ -11,8 +11,9 @@ import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import React, { useState } from "react";
 import { RegisterRequest } from "../types/auth";
-import { login, register } from "../api/auth";
+import { register } from "../api/auth";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../context/auth";
 
 export default function Register() {
   const [form, setForm] = useState<RegisterRequest>({
@@ -58,7 +59,7 @@ export default function Register() {
               <Label>Username</Label>
               <Input
                 placeholder="Your username..."
-                type="email"
+                type="text"
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="w-[70%]"
               />
