@@ -186,3 +186,12 @@ func (wsc *WsController) JoinRoom(c *gin.Context) {
 	go client.writeMessage()
 	client.readMessage(wsc.hub)
 }
+
+func (wsc *WsController) GetRooms(c *gin.Context) {
+	var rooms []Room
+	if err := wsc.db.Find(&rooms).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"rooms": rooms})
+}

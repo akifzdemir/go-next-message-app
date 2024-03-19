@@ -10,6 +10,7 @@ func WsRouter(router *gin.Engine, wsc *controllers.WsController) {
 	{
 		wsGroup.POST("/create-room", wsc.CreateRoom)
 		wsGroup.GET("/join-room/:roomId", wsc.JoinRoom)
+		wsGroup.GET("/rooms", wsc.GetRooms)
 	}
 
 }
