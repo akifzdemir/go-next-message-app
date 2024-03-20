@@ -74,6 +74,6 @@ func (uc *UserController) Login(c *gin.Context) {
 		c.JSON(400, gin.H{"error": passwordErr.Error()})
 		return
 	}
-	token, _ := utils.GenerateToken(user.UserName)
+	token, _ := utils.GenerateToken(user.UserName, user.ID)
 	c.JSON(200, gin.H{"token": token})
 }

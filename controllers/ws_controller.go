@@ -34,7 +34,7 @@ type Message struct {
 type Room struct {
 	ID      string             `gorm:"primaryKey" json:"id"`
 	Name    string             `json:"name"`
-	Clients map[string]*Client `gorm:"-" json:"-"`
+	Clients map[string]*Client `gorm:"-"`
 }
 
 func (room *Room) BeforeCreate(tx *gorm.DB) (err error) {
@@ -75,10 +75,11 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
-			if _, ok := h.Rooms[client.Id]; ok {
-				r := h.Rooms[client.Id]
+			if _, ok := h.Rooms[client.RoomId]; ok {
+				r := h.Rooms[client.RoomId]
 				if _, ok := r.Clients[client.Id]; !ok {
 					r.Clients[client.Id] = client
+
 				}
 			}
 		case client := <-h.Unregister:
@@ -101,12 +102,14 @@ func (h *Hub) Run() {
 
 }
 
-func (c *Client) writeMessage() {
+func (c *Client) WriteMessage() {
 	defer func() {
 		c.Conn.Close()
 	}()
 	for {
 		message, ok := <-c.Message
+		log.Printf("Message->>: %v", message)
+
 		if !ok {
 			return
 		}
@@ -114,7 +117,7 @@ func (c *Client) writeMessage() {
 	}
 }
 
-func (c *Client) readMessage(hub *Hub) {
+func (c *Client) ReadMessage(hub *Hub) {
 	defer func() {
 		hub.Unregister <- c
 		c.Conn.Close()
@@ -165,9 +168,24 @@ func (wsc *WsController) JoinRoom(c *gin.Context) {
 		return
 	}
 
+	var room Room
 	roomId := c.Param("roomId")
 	userName := c.Query("username")
 	userId := c.Query("userId")
+
+	if err := wsc.db.Where("id = ?", roomId).First(&room).Error; err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	if wsc.hub.Rooms[roomId] == nil {
+		wsc.hub.Rooms[roomId] = &Room{
+			ID:      roomId,
+			Name:    room.Name,
+			Clients: make(map[string]*Client),
+		}
+	}
+
 	client := &Client{
 		Id:       userId,
 		RoomId:   roomId,
@@ -175,7 +193,6 @@ func (wsc *WsController) JoinRoom(c *gin.Context) {
 		Conn:     conn,
 		Message:  make(chan *Message),
 	}
-
 	message := &Message{
 		Content:  "A User has joined the room",
 		Username: userName,
@@ -183,8 +200,9 @@ func (wsc *WsController) JoinRoom(c *gin.Context) {
 	}
 	wsc.hub.Register <- client
 	wsc.hub.Broadcast <- message
-	go client.writeMessage()
-	client.readMessage(wsc.hub)
+
+	go client.WriteMessage()
+	client.ReadMessage(wsc.hub)
 }
 
 func (wsc *WsController) GetRooms(c *gin.Context) {
