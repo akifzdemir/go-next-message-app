@@ -12,6 +12,7 @@ import {
 type AuthState = {
   isLoggedIn: boolean;
   username: string;
+  userId: string;
 };
 
 type ActionType = {
@@ -27,6 +28,7 @@ type ContextType = {
 const initialState: AuthState = {
   isLoggedIn: false,
   username: "",
+  userId: "",
 };
 
 const AuthContext = createContext<ContextType>({
@@ -42,7 +44,7 @@ const useAuth = () => {
   return context;
 };
 
-type CustomJwtPayload = JwtPayload & { username: string };
+type CustomJwtPayload = JwtPayload & { username: string; userId: string };
 
 const reducer = (state: AuthState, action: ActionType) => {
   switch (action.type) {
@@ -54,6 +56,7 @@ const reducer = (state: AuthState, action: ActionType) => {
         ...state,
         isLoggedIn: true,
         username: decodedToken.username,
+        userId: decodedToken.userId,
       };
     case "LOGOUT":
       localStorage.removeItem("jwt-token");
@@ -61,12 +64,14 @@ const reducer = (state: AuthState, action: ActionType) => {
         ...state,
         isLoggedIn: false,
         username: "",
+        userId: "",
       };
     case "SET_INITIAL":
       return {
         ...state,
         isLoggedIn: true,
-        username: action.payload,
+        username: action.payload?.username,
+        userId: action.payload?.userId,
       };
 
     default:
@@ -81,7 +86,13 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const token = localStorage.getItem("jwt-token");
     if (token) {
       const decodedToken = jwtDecode<CustomJwtPayload>(token);
-      dispatch({ type: "SET_INITIAL", payload: decodedToken.username });
+      dispatch({
+        type: "SET_INITIAL",
+        payload: {
+          username: decodedToken.username,
+          userId: decodedToken.userId,
+        },
+      });
     }
   }, []);
 

@@ -4,7 +4,6 @@ import { Button } from "@/app/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -26,7 +25,7 @@ export function CreateRoomDialog() {
     e.preventDefault();
     try {
       const res = await createRoom(form);
-      toast("Room Created");
+      toast.success("Room Created");
       setOpen(false);
     } catch (error) {
       console.log(error);
