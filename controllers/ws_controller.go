@@ -83,10 +83,10 @@ func (h *Hub) Run() {
 				}
 			}
 		case client := <-h.Unregister:
-			if _, ok := h.Rooms[client.Id]; ok {
-				r := h.Rooms[client.Id]
+			if _, ok := h.Rooms[client.RoomId]; ok {
+				r := h.Rooms[client.RoomId]
 				if _, ok := r.Clients[client.Id]; ok {
-					delete(h.Rooms[client.Id].Clients, client.Id)
+					delete(h.Rooms[client.RoomId].Clients, client.Id)
 					close(client.Message)
 				}
 			}
@@ -108,7 +108,6 @@ func (c *Client) WriteMessage() {
 	}()
 	for {
 		message, ok := <-c.Message
-		log.Printf("Message->>: %v", message)
 
 		if !ok {
 			return
