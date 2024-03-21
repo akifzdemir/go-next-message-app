@@ -54,8 +54,9 @@ export default function Page({ params }: { params: { id: string } }) {
         {messages?.map((message, i) => (
           <Card
             className={cn(
-              "p-0 w-1/2",
-              state.username === message.Username ? "self-end " : "self-start"
+              "p-0 w-1/3",
+              state.username === message.Username ? "self-end " : "self-start",
+              message.Content === "A User has joined the room" && "self-center"
             )}
             key={i}
           >
